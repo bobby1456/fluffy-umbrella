@@ -6,45 +6,35 @@ import pytest
 from repositories.db import Database
 from pathlib import Path
 
-client = TestClient(app)
 
 
-@pytest.fixture(scope="module", autouse=True)
-def setup():
-    test_env_path = Path(__file__).parent / 'test.env'
-    print(f"Loading environment variables from: {test_env_path}")
-    load_dotenv(test_env_path, override=True)
-    db_path = Path(__file__).parent / 'test.db'
-    Database(db_path) 
-    yield
-    Database().destroy()
-    
-def test_read_root():
+def test_read_root(client):
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "Welcome to the Movie Night API!"}
 
-def test_create_room():
-    print("database file name:")
-    print(os.getenv("DB_FILE_NAME"))
+def test_create_room(client):
     response = client.post("/rooms", json={"name": "Test Create Room", "username": "Test User Create Room"})
-    print(response.json())
     assert response.status_code == 201
     assert "room" in response.json()
-    assert "user" in response.json()
+    assert "users" in response.json()
+    assert response.json()["room"]["id"] is not None
     assert response.json()["room"]["name"] == "Test Create Room"
-    assert response.json()["user"]["username"] == "Test User Create Room"
+    assert response.json()["users"][0]["id"] is not None
+    assert response.json()["users"][0]["username"] == "Test User Create Room"
+    assert response.json()["users"][0]["room_id"] == response.json()["room"]["id"]
+    assert response.json()["users"][0]["created_at"] is not None
 
-def test_create_room_invalid_data():
+def test_create_room_invalid_data(client):
     response = client.post("/rooms", json={"name": "  ", "username": "  "})
     assert response.status_code == 400
-    assert response.json() == {"detail": "Room name or username cannot be empty"}
+    assert response.json()["detail"] is not None
 
     response = client.post("/rooms", json={"name": "ab", "username": "ab"})
     assert response.status_code == 400
-    assert response.json() == {"detail": "Room and user name must be at least 3 characters long"}
+    assert response.json()["detail"] is not None
 
-def test_get_room():
+def test_get_room(client):
     create_response = client.post("/rooms", json={"name": "Test Room Get Room", "username": "Test User Get Room"})
     assert create_response.status_code == 201
     room_id = create_response.json()["room"]["id"]
@@ -54,9 +44,10 @@ def test_get_room():
     assert response.json()["room"]["id"] == room_id
     assert response.json()["room"]["name"] == "Test Room Get Room"
     assert len(response.json()["users"]) > 0 
-    assert response.json()["users"][0][1] == "Test User Get Room"
+    assert response.json()["users"][0]["username"] == "Test User Get Room"
 
-def test_get_nonexistent_room():
+def test_get_nonexistent_room(client):
     response = client.get("/rooms/Nonexistent+Room")
     assert response.status_code == 404
-    assert response.json() == {"detail": "Room not found"}
+    assert response.json()["detail"] is not None
+

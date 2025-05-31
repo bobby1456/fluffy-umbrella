@@ -16,7 +16,6 @@ class RoomsRepository:
         self._conn.commit()
         cursor = self._conn.cursor()
         cursor.execute("SELECT id FROM room WHERE name = ?", (name,))
-        print(f"Room created with ID: {cursor.fetchone()}")
         return cursor.lastrowid
 
     def get_room(self, room_id):

@@ -16,7 +16,7 @@ class RoomCreateRequest(BaseModel):
 
 @app.post("/rooms", status_code=201)
 def create_room(request: RoomCreateRequest):
-
+    print("Creating room with request:", request)
     name = request.name.strip()
     username = request.username.strip()
     if not name or not username:
@@ -26,31 +26,44 @@ def create_room(request: RoomCreateRequest):
     
     room_id = Database().rooms.create_room(name)
     user_id = Database().users.create_user(username, room_id)
+    user = Database().users.get_user(user_id)
     return {
         "room": {
             "id": room_id,
             "name": name,
         },
-        "user": {
-            "username": username,
-            "user_id": user_id
-        }
+        "users": [user]
     }
 
 @app.get("/rooms/{room_name}")
 def get_room(room_name: str):
+    print(f"Getting room with name: {room_name}")
     decoded_room_name = unquote(room_name.strip())
     room = Database().rooms.get_room_by_name(decoded_room_name)
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     
-    print(f"Retrieved room: {room}")
-    
-    users = Database().rooms.get_users_in_room(room[0])
+    users = Database().rooms.get_users_in_room(room["id"])
     return {
         "room": {
-            "id": room[0],
-            "name": room[1],
+            "id": room["id"],
+            "name": room["name"],
         },
         "users": users
     }
+
+class CreatePropositionRequest(BaseModel):
+    film_name: str
+
+@app.post("/users/{user_id}/propositions", status_code=201)
+def create_proposition(user_id: int, request: CreatePropositionRequest):
+    film_name = request.film_name.strip()
+    if not film_name:
+        raise HTTPException(status_code=400, detail="Film name cannot be empty")
+    
+    user = Database().users.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    proposition_id = Database().propositions.create_proposition(user_id, film_name)
+    return {"proposition_id": proposition_id, "film_name": film_name}
