@@ -1,16 +1,15 @@
-from api import app
 from fastapi.testclient import TestClient
-from dotenv import load_dotenv
+from fastapi import FastAPI
+from api import router as api_router
 import pytest
-from repositories.db import Database
+from repositories import database
 from pathlib import Path
 
 @pytest.fixture(scope="session", autouse=True)
 def client():
-    test_env_path = Path(__file__).parent / 'test.env'
-    print(f"Loading environment variables from: {test_env_path}")
-    load_dotenv(test_env_path, override=True)
-    db_path = Path(__file__).parent / 'test.db'
-    Database(db_path) 
+    db_config = database.DatabaseEngineConfig(db_file_name="test_database.db")
+    database.init_engine(db_config)
+    app = FastAPI()
+    app.include_router(api_router)
     yield TestClient(app)
-    Database().destroy()
+    database.destroy()
