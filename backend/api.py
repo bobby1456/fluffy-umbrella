@@ -13,7 +13,6 @@ class RoomCreateRequest(BaseModel):
     name: str
     username: str
 
-
 @app.post("/rooms", status_code=201)
 def create_room(request: RoomCreateRequest):
     print("Creating room with request:", request)
@@ -35,10 +34,28 @@ def create_room(request: RoomCreateRequest):
         "users": [user]
     }
 
-@app.get("/rooms/{room_name}")
-def get_room(room_name: str):
-    print(f"Getting room with name: {room_name}")
-    decoded_room_name = unquote(room_name.strip())
+class AddUserToRoomRequest(BaseModel):
+    username: str
+
+@app.post("/rooms/{room_id}/users", status_code=201)
+def add_user_to_room(room_id: int, request: AddUserToRoomRequest):
+    print(f"Adding user with username: {request.username} to room with id: {room_id}")
+    username = request.username.strip()
+    if not username:
+        raise HTTPException(status_code=400, detail="Username cannot be empty")
+    
+    room = Database().rooms.get_room(room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    
+    user_id = Database().users.create_user(username, room_id)
+    user = Database().users.get_user(user_id)
+    return user
+
+@app.get("/rooms")
+def get_room(name: str):
+    print(f"Getting room with name: {name}")
+    decoded_room_name = unquote(name.strip())
     room = Database().rooms.get_room_by_name(decoded_room_name)
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
@@ -51,6 +68,29 @@ def get_room(room_name: str):
         },
         "users": users
     }
+
+@app.get("rooms/{room_id}")
+def get_room_by_id(room_id: int):
+    room = Database().rooms.get_room(room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    
+    users = Database().rooms.get_users_in_room(room_id)
+    return {
+        "room": {
+            "id": room["id"],
+            "name": room["name"],
+        },
+        "users": users
+    }
+
+@app.get("/rooms/{room_id}/propositions")
+def get_propositions(room_id: int):
+    propositions = Database().propositions.get_propositions_by_room(room_id)
+    if not propositions:
+        raise HTTPException(status_code=404, detail="No propositions found for this room")
+    
+    return propositions
 
 class CreatePropositionRequest(BaseModel):
     film_name: str

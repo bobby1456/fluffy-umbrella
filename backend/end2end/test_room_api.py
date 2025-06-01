@@ -34,12 +34,12 @@ def test_create_room_invalid_data(client):
     assert response.status_code == 400
     assert response.json()["detail"] is not None
 
-def test_get_room(client):
+def test_get_room_by_name(client):
     create_response = client.post("/rooms", json={"name": "Test Room Get Room", "username": "Test User Get Room"})
     assert create_response.status_code == 201
     room_id = create_response.json()["room"]["id"]
 
-    response = client.get(f"/rooms/Test%20Room%20Get%20Room")
+    response = client.get(f"/rooms?name=Test%20Room%20Get%20Room")
     assert response.status_code == 200
     assert response.json()["room"]["id"] == room_id
     assert response.json()["room"]["name"] == "Test Room Get Room"
@@ -50,4 +50,3 @@ def test_get_nonexistent_room(client):
     response = client.get("/rooms/Nonexistent+Room")
     assert response.status_code == 404
     assert response.json()["detail"] is not None
-

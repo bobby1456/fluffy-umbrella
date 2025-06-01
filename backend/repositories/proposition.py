@@ -21,6 +21,11 @@ class PropositionsRepository:
         cursor = self._conn.cursor()
         cursor.execute("SELECT * FROM proposition WHERE id = ?", (proposition_id,))
         return cursor.fetchone()
+    
+    def get_propositions_by_room(self, room_id):
+        cursor = self._conn.cursor()
+        cursor.execute("Select * from proposition join user on proposition.user_id = user.id where user.room_id = ?", (room_id,))
+        return cursor.fetchall()
 
     def update_proposition(self, proposition_id, film_name=None):
         cursor = self._conn.cursor()

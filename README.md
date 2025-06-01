@@ -13,6 +13,5 @@ python db.py
 
 ```
 cd backend
-PYTHONPATH=. pytest
-
+pytest
 ```
