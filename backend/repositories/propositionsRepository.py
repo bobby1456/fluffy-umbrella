@@ -22,3 +22,7 @@ class PropositionsRepository:
     def get_propositions_by_room(self, room_id):
         statement = select(Proposition).join(User).where(User.room_id == room_id)
         return self._session.exec(statement).all()
+    
+    def get_propositions_by_user(self, user_id):
+        statement = select(Proposition).where(Proposition.user_id == user_id)
+        return self._session.exec(statement).all()

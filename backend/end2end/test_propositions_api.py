@@ -1,0 +1,30 @@
+import pytest
+
+def test_create_proposition(client, users):
+    response = client.post(f"/users/{users[0]["id"]}/propositions", json={"film_name": "Inception"})
+    assert response.status_code == 201
+    assert response.json()["film_name"] == "Inception"
+    assert response.json()["user_id"] == users[0]["id"]
+    
+
+def test_create_proposition_invalid_data(client, users):
+    response = client.post(f"/users/{users[0]}/propositions", json={})
+    assert response.status_code == 422
+    assert response.json()["detail"] is not None
+
+@pytest.mark.skip(reason="to implement")
+def test_get_propositions(client, users):
+    film_count_per_user = 4
+    for user in users:
+        for i in range(1, film_count_per_user + 1):
+            create_response = client.post(f"/users/{user["id"]}/propositions", json={"film_name": f"Film {i}"})
+            assert create_response.status_code == 201
+
+    get_response = client.get(f"/rooms/{users[0]["room_id"]}/propositions")
+    assert get_response.status_code == 200
+    propositions = get_response.json()
+    assert len(propositions) == film_count_per_user * len(users)
+    assert propositions[0]["user_id"] == users[0]["id"]
+    assert propositions[0]["film_name"] == "Film 1"
+    assert propositions[-1]["user_id"] == users[-1]["id"]
+    assert propositions[film_count_per_user]["user_id"] == users[0]["id"]

@@ -12,3 +12,10 @@ class VotesRepository:
         self._session.commit()
         self._session.refresh(vote)
         return vote
+    
+    def get_vote(self, vote_id: int):
+        return self._session.get(Vote, vote_id)
+    
+    def get_votes_by_proposition(self, proposition_id: int):
+        statement = select(Vote).where(Vote.proposition_id == proposition_id)
+        return self._session.exec(statement).all()
