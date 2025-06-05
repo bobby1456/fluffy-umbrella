@@ -40,11 +40,7 @@ def get_engine():
     return engine
 
 def destroy():
-    if engine is None:
-        raise Exception("DatabaseEngine is not initialized.")
-    
-    engine.dispose()
-    gc.collect()
+    close()
     db_file = Path(_config.db_file_name)
     if db_file.exists():
         db_file.unlink()
@@ -64,6 +60,12 @@ def init_engine(config: DatabaseEngineConfig):
     _config = config
     SQLModel.metadata.create_all(engine)
 
+def close():
+    global engine
+    if engine is not None:
+        engine.dispose()
+        engine = None
+    gc.collect()
 
 DatabaseDep = Annotated[Database, Depends(get_database)]
 

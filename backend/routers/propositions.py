@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from repositories.database import DatabaseDep
-from repositories.model.proposition import Proposition
+from repositories.model.proposition import Proposition, PropositionCreate
 from repositories.model.vote import Vote
 
 
@@ -20,9 +20,8 @@ def create_proposition(user_id: int, request: CreatePropositionRequest, database
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    proposition:Proposition = Proposition(
+    proposition = PropositionCreate(
         film_name=film_name,
         user_id=user_id
     )
-    proposition = database.propositions.create_proposition(proposition)
-    return proposition
+    return database.propositions.create_proposition(proposition)

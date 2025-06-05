@@ -1,5 +1,5 @@
 from sqlmodel import Session, select, join
-from repositories.model.proposition import Proposition
+from repositories.model.proposition import Proposition, PropositionCreate
 from repositories.model.user import User
 
 
@@ -10,11 +10,12 @@ class PropositionsRepository:
     def __init__(self, session: Session):
         self._session = session
 
-    def create_proposition(self, Proposition: Proposition):
-        self._session.add(Proposition)
+    def create_proposition(self, proposition: PropositionCreate):
+        db_proposition = Proposition.model_validate(proposition)
+        self._session.add(db_proposition)
         self._session.commit()
-        self._session.refresh(Proposition)
-        return Proposition
+        self._session.refresh(db_proposition)
+        return db_proposition
 
     def get_proposition(self, proposition_id):
         return self._session.get(Proposition, proposition_id)

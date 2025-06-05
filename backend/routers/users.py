@@ -2,8 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from repositories.database import DatabaseDep
-from repositories.model.proposition import Proposition
-from repositories.model.user import User
+from repositories.model.user import User, UserCreate, UserPublic
 
 router = APIRouter()
 
@@ -11,7 +10,7 @@ class AddUserToRoomRequest(BaseModel):
     username: str
 
     
-@router.post("/rooms/{room_id}/users", status_code=201)
+@router.post("/rooms/{room_id}/users", response_model=UserPublic, status_code=201)
 def add_user_to_room(room_id: int, request: AddUserToRoomRequest, database: DatabaseDep):
     print(f"Adding user with username: {request.username} to room with id: {room_id}")
     username = request.username.strip()
@@ -25,7 +24,7 @@ def add_user_to_room(room_id: int, request: AddUserToRoomRequest, database: Data
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     
-    user:User = User(
+    user:UserCreate = UserCreate(
         username=username,
         room_id=room_id
     )

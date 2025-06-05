@@ -1,7 +1,6 @@
 from typing import Generator
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
-from api import router as api_router
 from pytest import fixture, FixtureRequest
 from repositories import database
 from api import router
@@ -29,7 +28,7 @@ def room(client, test_suffix:str):
     response = client.post("/rooms", json={"name": f"Test Room {test_suffix}", "username": f"Test User {test_suffix}"})
     if response.status_code != 201:
         raise Exception(f"Failed to create room: {response.json()}")
-    return response.json()["room"]
+    return response.json()
 
 @fixture(scope="function")
 def users(client, room, test_suffix:str):
@@ -42,6 +41,12 @@ def users(client, room, test_suffix:str):
             raise Exception(f"Failed to create user {i} in room {room["id"]}: {response.json()}")
         result.append(response.json())
     return result
+
+
+@fixture(scope="function")
+def room_with_user(room, users):
+    return room
+
 
 @fixture(scope="function")
 def propositions(client, users):

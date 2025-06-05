@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from repositories.model.vote import Vote
+from repositories.model.vote import Vote, VoteCreate
 
 class VotesRepository:
     _session: Session = None
@@ -7,11 +7,12 @@ class VotesRepository:
     def __init__(self, session: Session):
         self._session = session
 
-    def create_vote(self, vote: Vote):
-        self._session.add(vote)
+    def create_vote(self, vote: VoteCreate):
+        db_vote = vote.model_validate(vote)
+        self._session.add(db_vote)
         self._session.commit()
-        self._session.refresh(vote)
-        return vote
+        self._session.refresh(db_vote)
+        return db_vote
     
     def get_vote(self, vote_id: int):
         return self._session.get(Vote, vote_id)
