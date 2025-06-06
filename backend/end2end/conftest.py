@@ -52,6 +52,7 @@ def room_with_user(room, users):
 def propositions(client, users):
     film_count_per_user:int = 4
     result = []
+    film_count:int = 0
     for user in users:
         for _ in range(1, film_count_per_user+1):
             response = client.post(f"/users/{user["id"]}/propositions", json={"film_name": f"Film {film_count}"})

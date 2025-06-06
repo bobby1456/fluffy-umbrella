@@ -5,6 +5,10 @@ def test_create_proposition(client, users):
     assert response.status_code == 201
     assert response.json()["film_name"] == "Inception"
     assert response.json()["user_id"] == users[0]["id"]
+    assert response.json()["id"] is not None
+    assert response.json()["created_at"] is not None
+    assert "votes" in response.json()
+    assert "user" not in response.json()
     
 
 def test_create_proposition_invalid_data(client, users):
@@ -28,3 +32,11 @@ def test_get_propositions(client, users):
     assert propositions[0]["film_name"] == "Film 1"
     assert propositions[-1]["user_id"] == users[-1]["id"]
     assert propositions[film_count_per_user]["user_id"] == users[0]["id"]
+
+def test_get_proposition(client, propositions):
+    proposition = propositions[0]
+    response = client.get(f"/propositions/{proposition["id"]}")
+    assert response.status_code == 200
+    assert response.json()["id"] == proposition["id"]
+    assert response.json()["film_name"] == proposition["film_name"]
+    assert response.json()["user_id"] == proposition["user_id"]

@@ -8,7 +8,7 @@ class VotesRepository:
         self._session = session
 
     def create_vote(self, vote: VoteCreate):
-        db_vote = vote.model_validate(vote)
+        db_vote = Vote.model_validate(vote)
         self._session.add(db_vote)
         self._session.commit()
         self._session.refresh(db_vote)

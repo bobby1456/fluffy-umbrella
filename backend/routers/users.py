@@ -31,3 +31,10 @@ def add_user_to_room(room_id: int, request: AddUserToRoomRequest, database: Data
     user = database.users.create_user(user)
     return user
 
+@router.get("/users/{user_id}", response_model=UserPublic)
+def get_user(user_id: int, database: DatabaseDep):
+    user = database.users.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return user

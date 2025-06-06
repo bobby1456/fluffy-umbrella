@@ -3,6 +3,9 @@ def test_create_user(client, room):
     assert response.status_code == 201
     assert response.json()["username"] == "Test User Create"
     assert response.json()["room_id"] == room["id"]
+    assert response.json()["id"] is not None
+    assert response.json()["created_at"] is not None
+    assert "room" not in response.json()
 
 def test_create_multiple_users_in_room(client, room):
     user_count = 5
@@ -40,3 +43,10 @@ def test_add_user_to_nonexistent_room(client):
     assert response.status_code == 404
     assert response.json()["detail"] is not None
 
+def test_get_user(client, users):
+    user = users[0]
+    response = client.get(f"/users/{user['id']}")
+    assert response.status_code == 200
+    assert response.json()["id"] == user["id"]
+    assert response.json()["username"] == user["username"]
+    assert response.json()["room_id"] == user["room_id"]
