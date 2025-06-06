@@ -4,34 +4,28 @@ from pydantic import BaseModel
 from repositories.database import DatabaseDep
 from repositories.model.user import User, UserCreate, UserPublic
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["users"])
 
-class AddUserToRoomRequest(BaseModel):
-    username: str
-
-    
-@router.post("/rooms/{room_id}/users", response_model=UserPublic, status_code=201)
-def add_user_to_room(room_id: int, request: AddUserToRoomRequest, database: DatabaseDep):
-    print(f"Adding user with username: {request.username} to room with id: {room_id}")
-    username = request.username.strip()
+@router.post("", response_model=UserPublic, status_code=201)
+def create_user(user_create: UserCreate, database: DatabaseDep):
+    print(f"Adding user {user_create}")
+    username = user_create.username.strip()
     if not username:
         raise HTTPException(status_code=400, detail="Username cannot be empty")
     
     if len(username) < 3:
         raise HTTPException(status_code=400, detail="Username must be at least 3 characters long")
     
-    room = database.rooms.get_room(room_id)
+    user_create.username = username
+    
+    room = database.rooms.get_room(user_create.room_id)
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     
-    user:UserCreate = UserCreate(
-        username=username,
-        room_id=room_id
-    )
-    user = database.users.create_user(user)
+    user = database.users.create_user(user_create)
     return user
 
-@router.get("/users/{user_id}", response_model=UserPublic)
+@router.get("/{user_id}", response_model=UserPublic)
 def get_user(user_id: int, database: DatabaseDep):
     user = database.users.get_user(user_id)
     if not user:

@@ -5,28 +5,22 @@ from repositories.model.proposition import Proposition, PropositionCreate, Propo
 from repositories.model.vote import Vote
 
 
-router = APIRouter()
+router = APIRouter(prefix="/propositions", tags=["propositions"])
 
-class CreatePropositionRequest(BaseModel):
-    film_name: str
-
-@router.post("/users/{user_id}/propositions", status_code=201)
-def create_proposition(user_id: int, request: CreatePropositionRequest, database: DatabaseDep) -> PropositionPublic:
-    film_name = request.film_name.strip()
+@router.post("", status_code=201)
+def create_proposition(proposition_create: PropositionCreate, database: DatabaseDep) -> PropositionPublic:
+    film_name = proposition_create.film_name.strip()
     if not film_name:
         raise HTTPException(status_code=400, detail="Film name cannot be empty")
-    
-    user = database.users.get_user(user_id)
+    proposition_create.film_name = film_name
+
+    user = database.users.get_user(proposition_create.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    proposition = PropositionCreate(
-        film_name=film_name,
-        user_id=user_id
-    )
-    return database.propositions.create_proposition(proposition)
+    return database.propositions.create_proposition(proposition_create)
 
-@router.get("/propositions/{proposition_id}", response_model=PropositionPublic)
+@router.get("/{proposition_id}", response_model=PropositionPublic)
 def get_proposition(proposition_id: int, database: DatabaseDep) -> PropositionPublic:
     proposition = database.propositions.get_proposition(proposition_id)
     if not proposition:

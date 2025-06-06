@@ -1,5 +1,5 @@
 def test_create_user(client, room):
-    response = client.post(f"/rooms/{room["id"]}/users", json={"username": "Test User Create"})
+    response = client.post(f"/users", json={"username": "Test User Create", "room_id": room["id"]})
     assert response.status_code == 201
     assert response.json()["username"] == "Test User Create"
     assert response.json()["room_id"] == room["id"]
@@ -10,7 +10,7 @@ def test_create_user(client, room):
 def test_create_multiple_users_in_room(client, room):
     user_count = 5
     for i in range(user_count):
-        create_response = client.post(f"/rooms/{room['id']}/users", json={"username": f"User {i + 1}"})
+        create_response = client.post(f"/users", json={"username": f"User {i + 1}", "room_id": room["id"]})
         assert create_response.status_code == 201
         assert create_response.json()["username"] == f"User {i + 1}"
         assert create_response.json()["room_id"] == room["id"]
@@ -26,20 +26,20 @@ def test_create_multiple_users_in_room(client, room):
         assert users[i]["room_id"] == room["id"]
 
 def test_create_user_invalid_data(client, room):
-    response = client.post(f"/rooms/{room["id"]}/users", json={"username": "  "})
+    response = client.post(f"/users", json={"username": "  ", "room_id": room["id"]})
     assert response.status_code == 400
     assert response.json()["detail"] is not None
 
-    response = client.post(f"/rooms/{room["id"]}/users", json={"username": "ab"})
+    response = client.post(f"/users", json={"username": "ab", "room_id": room["id"]})
     assert response.status_code == 400
     assert response.json()["detail"] is not None
 
-    response = client.post(f"/rooms/{room["id"]}/users", json={})
+    response = client.post(f"/users", json={})
     assert response.status_code == 422
     assert response.json()["detail"] is not None
 
 def test_add_user_to_nonexistent_room(client):
-    response = client.post("/rooms/999/users", json={"username": "Test User Nonexistent Room"})
+    response = client.post("/users", json={"username": "Test User Nonexistent Room", "room_id": 999})
     assert response.status_code == 404
     assert response.json()["detail"] is not None
 

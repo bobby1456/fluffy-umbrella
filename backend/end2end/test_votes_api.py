@@ -2,7 +2,7 @@ def test_vote_on_proposition(client, propositions, users):
     proposition = propositions[0]
     user = users[-1]
 
-    response = client.post(f"/propositions/{proposition['id']}/votes", json={"user_id": user["id"], "value": "up"})
+    response = client.post(f"/votes", json={"user_id": user["id"], "proposition_id": proposition["id"] , "value": "up"})
     assert response.status_code == 201
     assert response.json()["proposition_id"] == proposition["id"]
     assert response.json()["user_id"] == user["id"]
@@ -32,7 +32,7 @@ def test_vote_on_nonexistent_proposition(client, users):
 
 def test_vote_on_proposition_by_nonexistent_user(client, propositions):
     proposition = propositions[0]
-    response = client.post(f"/propositions/{proposition['id']}/votes", json={"user_id": 999, "value": "up"})
+    response = client.post(f"/votes", json={"user_id": 999, "proposition_id":proposition["id"], "value": "up"})
     assert response.status_code == 404
     assert response.json()["detail"] is not None
 
@@ -40,10 +40,10 @@ def test_vote_on_proposition_invalid_data(client, propositions, users):
     proposition = propositions[0]
     user = users[0]
 
-    response = client.post(f"/propositions/{proposition['id']}/votes", json={})
+    response = client.post(f"/votes", json={})
     assert response.status_code == 422
     assert response.json()["detail"] is not None
 
-    response = client.post(f"/propositions/{proposition['id']}/votes", json={"user_id": user["id"], "value": "invalid"})
+    response = client.post(f"/votes", json={"user_id": user["id"], "proposition_id":proposition["id"], "value": "invalid"})
     assert response.status_code == 400
     assert response.json()["detail"] is not None

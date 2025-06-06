@@ -4,9 +4,9 @@ from pydantic import BaseModel
 from repositories.database import DatabaseDep
 from repositories.model.room import RoomCreate, RoomPublicWithUsers
 
-router = APIRouter()
+router = APIRouter(prefix="/rooms", tags=["rooms"])
 
-@router.post("/rooms", response_model=RoomPublicWithUsers, status_code=201)
+@router.post("", response_model=RoomPublicWithUsers, status_code=201)
 def create_room(room_create: RoomCreate, database: DatabaseDep):
     print("Creating room with request:", room_create)
     name = room_create.name.strip()
@@ -22,7 +22,7 @@ def create_room(room_create: RoomCreate, database: DatabaseDep):
     print(f"Room created: {room}")
     return room
 
-@router.get("/rooms/find", response_model=RoomPublicWithUsers)
+@router.get("/find", response_model=RoomPublicWithUsers)
 def get_room(name: str,  database: DatabaseDep):
     print(f"Getting room with name: {name}")
     if not name:
@@ -35,7 +35,7 @@ def get_room(name: str,  database: DatabaseDep):
 
     return room
 
-@router.get("/rooms/{room_id}", response_model=RoomPublicWithUsers)
+@router.get("/{room_id}", response_model=RoomPublicWithUsers)
 def get_room_by_id(room_id: int, database: DatabaseDep):
     room = database.rooms.get_room(room_id)
     if not room:

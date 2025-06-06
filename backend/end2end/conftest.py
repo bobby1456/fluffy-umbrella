@@ -1,5 +1,5 @@
 from typing import Generator
-from fastapi.testclient import TestClient
+from starlette.testclient import TestClient
 from fastapi import FastAPI
 from pytest import fixture, FixtureRequest
 from repositories import database
@@ -36,7 +36,7 @@ def users(client, room, test_suffix:str):
     user_number:int = 1
     result = []
     for i in range(1, user_number + 1):
-        response = client.post(f"/rooms/{room["id"]}/users", json={"username": f"Test User {test_suffix} {i}"})
+        response = client.post(f"/users", json={"username": f"Test User {test_suffix} {i}", "room_id": room["id"]})
         if response.status_code != 201:
             raise Exception(f"Failed to create user {i} in room {room["id"]}: {response.json()}")
         result.append(response.json())
@@ -55,7 +55,7 @@ def propositions(client, users):
     film_count:int = 0
     for user in users:
         for _ in range(1, film_count_per_user+1):
-            response = client.post(f"/users/{user["id"]}/propositions", json={"film_name": f"Film {film_count}"})
+            response = client.post(f"/propositions", json={"film_name": f"Film {film_count}", "user_id": user["id"]})
             if response.status_code != 201:
                 raise Exception(f"Failed to create proposition for user {user["id"]}: {response.json()}")
             result.append(response.json())
