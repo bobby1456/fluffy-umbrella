@@ -5,7 +5,12 @@ from repositories.model.vote import VotePublic
 
 
 class PropositionBase(SQLModel):
-    film_name: str = Field(index=True, nullable=False)
+    title: str = Field(nullable=True)
+    year: str = Field(nullable=True)
+    imdbid: str = Field(nullable=True)
+    type: str = Field(nullable=True) 
+    poster: str = Field(nullable=True)
+
     user_id: int = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
 
 class Proposition(PropositionBase, table=True):
@@ -14,17 +19,12 @@ class Proposition(PropositionBase, table=True):
     
     user:"User" = Relationship(back_populates="propositions")
     votes: list["Vote"] = Relationship(back_populates="proposition")
-
-    def __repr__(self):
-        return f"Proposition(id={self.id}, film_name={self.film_name}, user_id={self.user_id})"
-    
+        
 class PropositionCreate(PropositionBase):
     pass
+    
 
 class PropositionPublic(PropositionBase):
     id: int
     created_at: str
     votes: list[VotePublic] = []
-
-    def __repr__(self):
-        return f"PropositionPublic(id={self.id}, film_name={self.film_name}, user_id={self.user_id}, created_at={self.created_at})"

@@ -1,6 +1,5 @@
 from urllib.parse import unquote
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 from repositories.database import DatabaseDep
 from repositories.model.room import RoomCreate, RoomPublicWithUsers
 

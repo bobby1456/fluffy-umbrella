@@ -1,11 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from repositories.database import DatabaseDep
 import apis.movies_api as movies_api
-from repositories.model.movie import MovieCreate
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
-@router.get("/search", response_model=list[MovieCreate])
+@router.get("/search", response_model=list[movies_api.Movie])
 async def search_movies(name: str, movie_type:str):
     if not name:
         raise HTTPException(status_code=400, detail="Movie name cannot be empty")

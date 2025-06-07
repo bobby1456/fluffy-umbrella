@@ -1,7 +1,6 @@
-from sqlmodel import Session, select, join
+from sqlmodel import Session, select
 from repositories.model.proposition import Proposition, PropositionCreate
 from repositories.model.user import User
-
 
 class PropositionsRepository:
 
@@ -10,7 +9,7 @@ class PropositionsRepository:
     def __init__(self, session: Session):
         self._session = session
 
-    def create_proposition(self, proposition: PropositionCreate):
+    def create_proposition(self, proposition: PropositionCreate) -> Proposition:
         db_proposition = Proposition.model_validate(proposition)
         self._session.add(db_proposition)
         self._session.commit()

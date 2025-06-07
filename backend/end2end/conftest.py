@@ -4,6 +4,7 @@ import pytest_asyncio
 from starlette.testclient import TestClient
 from fastapi import FastAPI
 from pytest import fixture, FixtureRequest
+from .movies_data import movies
 from repositories import database
 from api import router
 
@@ -56,7 +57,7 @@ def users(client, room, test_suffix:str):
 def room_with_user(room, users):
     return room
 
-
+# manage case where users makes a proposition that already exists
 @fixture(scope="function")
 def propositions(client, users):
     film_count_per_user:int = 4
@@ -64,7 +65,7 @@ def propositions(client, users):
     film_count:int = 0
     for user in users:
         for _ in range(1, film_count_per_user+1):
-            response = client.post(f"/propositions", json={"film_name": f"Film {film_count}", "user_id": user["id"]})
+            response = client.post(f"/propositions", json={"user_id": user["id"], **movies[film_count]})
             if response.status_code != 201:
                 raise Exception(f"Failed to create proposition for user {user["id"]}: {response.json()}")
             result.append(response.json())

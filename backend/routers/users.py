@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
 from repositories.database import DatabaseDep
-from repositories.model.user import User, UserCreate, UserPublic
+from repositories.model.user import UserCreate, UserPublic
 
 router = APIRouter(prefix="/users", tags=["users"])
 
