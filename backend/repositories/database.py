@@ -1,3 +1,4 @@
+from .moviesRepository import MoviesRepository
 from .roomsRepository import RoomsRepository
 from .usersRepository import UsersRepository
 from .propositionsRepository import PropositionsRepository
@@ -15,12 +16,14 @@ class Database:
     users: UsersRepository = None
     propositions: PropositionsRepository = None
     votes: VotesRepository = None
+    movies: MoviesRepository = None
 
     def __init__(self, session):
         self.rooms = RoomsRepository(session)
         self.users = UsersRepository(session)
         self.propositions = PropositionsRepository(session)
         self.votes = VotesRepository(session)
+        self.movies = MoviesRepository(session)
 
 class DatabaseEngineConfig:
     db_file_name: str

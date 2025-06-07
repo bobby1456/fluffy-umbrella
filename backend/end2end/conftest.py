@@ -1,23 +1,32 @@
-from typing import Generator
+from typing import AsyncGenerator, Generator
+from httpx import ASGITransport, AsyncClient
+import pytest_asyncio
 from starlette.testclient import TestClient
 from fastapi import FastAPI
 from pytest import fixture, FixtureRequest
 from repositories import database
 from api import router
 
-def create_test_app() -> FastAPI:
+@fixture(scope="session")
+def app() -> FastAPI:
     app = FastAPI()
-    app.include_router(router, tags=["rooms"])
+    app.include_router(router)
     return app
 
 @fixture(scope="session", autouse=True)
-def client()-> Generator[TestClient]:
+def client(app)-> Generator[TestClient]:
     db_config = database.DatabaseEngineConfig(db_file_name="test_database.db")
     database.init_engine(db_config)
 
-    app = create_test_app()
     yield TestClient(app)
     database.destroy()
+
+@pytest_asyncio.fixture(scope="module")
+async def async_client(app) -> AsyncGenerator[AsyncClient]:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        yield ac
 
 @fixture(scope="function")
 def test_suffix(request:FixtureRequest):
