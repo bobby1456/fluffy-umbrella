@@ -1,3 +1,5 @@
+from typing import Annotated
+from pydantic import StringConstraints
 from sqlmodel import Field, Relationship, SQLModel
 from datetime import datetime
 
@@ -5,11 +7,11 @@ from repositories.model.vote import VotePublic
 
 
 class PropositionBase(SQLModel):
-    title: str = Field(nullable=True)
-    year: str = Field(nullable=True)
-    imdbid: str = Field(nullable=True)
-    type: str = Field(nullable=True) 
-    poster: str = Field(nullable=True)
+    title: Annotated[str, StringConstraints(min_length=1, max_length=100)]
+    year: Annotated[str, StringConstraints(min_length=1, max_length=100)]
+    imdbid: Annotated[str, StringConstraints(min_length=1, max_length=100)]
+    type: Annotated[str, StringConstraints(min_length=1, max_length=100)]
+    poster: Annotated[str, StringConstraints(min_length=1, max_length=2000, pattern=r"^https?://.+")]
 
     user_id: int = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
 
@@ -19,7 +21,7 @@ class Proposition(PropositionBase, table=True):
     
     user:"User" = Relationship(back_populates="propositions")
     votes: list["Vote"] = Relationship(back_populates="proposition")
-        
+
 class PropositionCreate(PropositionBase):
     pass
     

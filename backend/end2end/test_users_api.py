@@ -27,11 +27,11 @@ def test_create_multiple_users_in_room(client, room):
 
 def test_create_user_invalid_data(client, room):
     response = client.post(f"/users", json={"username": "  ", "room_id": room["id"]})
-    assert response.status_code == 400
+    assert response.status_code == 422
     assert response.json()["detail"] is not None
 
-    response = client.post(f"/users", json={"username": "ab", "room_id": room["id"]})
-    assert response.status_code == 400
+    response = client.post(f"/users", json={"username": "a", "room_id": room["id"]})
+    assert response.status_code == 422
     assert response.json()["detail"] is not None
 
     response = client.post(f"/users", json={})

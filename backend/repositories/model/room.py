@@ -1,10 +1,12 @@
-from sqlmodel import Field, Relationship, SQLModel
 from datetime import datetime
+from typing import Annotated
+from pydantic import StringConstraints
+from sqlmodel import Field, Relationship, SQLModel
 
 from repositories.model.user import UserPublic
 
 class RoomBase(SQLModel):
-    name: str = Field(index=True, nullable=False)
+    name: Annotated[str, StringConstraints(min_length=3, max_length=100, strip_whitespace=True)]
 
 class Room(RoomBase, table=True):
     id: int | None = Field(default=None, primary_key=True)

@@ -5,7 +5,7 @@ from datetime import datetime
 class VoteBase(SQLModel):
     proposition_id: int = Field(foreign_key="proposition.id", nullable=False, ondelete="CASCADE")
     user_id: int = Field(foreign_key="user.id", nullable=False)
-    value:str = Field(index=True, nullable=False) 
+    value:str = Field(index=True, nullable=False, regex=r"^(up|down)$", description="Vote value must be 'up' or 'down'")
 
 class Vote(VoteBase, table=True):
     id: int |None = Field(default=None, primary_key=True)

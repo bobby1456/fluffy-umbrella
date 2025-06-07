@@ -17,6 +17,10 @@ class RoomsRepository:
         self._session.refresh(db_room)
         return db_room
 
+    def find_room(self, room_name: str):
+        statement = select(Room).where(Room.name == room_name)
+        return self._session.exec(statement).first()
+
     def get_room(self, room_id):
         return self._session.exec(select(Room).where(Room.id == room_id).options(selectinload(Room.users))).first()
 

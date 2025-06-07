@@ -7,13 +7,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("", response_model=UserPublic, status_code=201)
 def create_user(user_create: UserCreate, database: DatabaseDep):
-    print(f"Adding user {user_create}")
     username = user_create.username.strip()
-    if not username:
-        raise HTTPException(status_code=400, detail="Username cannot be empty")
-    
-    if len(username) < 3:
-        raise HTTPException(status_code=400, detail="Username must be at least 3 characters long")
     
     user_create.username = username
     
